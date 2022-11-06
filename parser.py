@@ -60,17 +60,17 @@ class RuobrRecipient:
             async with ClientSession() as session:
                 async with session.get('https://cabinet.ruobr.ru//student/progress/?page=1',
                                        cookies=self.__cookie) as response:
-                    soup = BeautifulSoup(await response.text(), 'lxml')
+                    soup = BeautifulSoup(await response.text(),'html.parser')
                     pagination = int([link.get('href') for link in soup.find_all('a')][-2].split('=')[1]) + 1
                     return pagination
 
         async def __handler():
             all_marks = []
             for request in await __taskmaster():
-                soup = BeautifulSoup(request, 'lxml')
+                soup = BeautifulSoup(request,'html.parser')
                 data = list(map(str, soup.find_all('tr')))
                 for t in data:
-                    cleantext = BeautifulSoup(t, 'lxml').text.split('\n')[3:6]
+                    cleantext = BeautifulSoup(t,'html.parser').text.split('\n')[3:6]
                     if cleantext != ['Дата', 'Дисциплина', 'Отметка']:
                         all_marks.append(cleantext)
 
