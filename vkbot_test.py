@@ -4,9 +4,13 @@ from database import DataBase
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from parser import RuobrRecipient, RuobrException
+
+
+from parser import Ruobr, RuobrException
 
 from data import token, sticker
+
+import requests
 
 
 class Bot:
@@ -15,7 +19,7 @@ class Bot:
         self.stage, self.login, self.password = None, None, None
 
         """VK API"""
-        self.session = vk_api.VkApi(token=token)
+        self.session = vk_api.VkApi(login='89609130789', password='182801DanieruDaivkontakte', token=token)
         self.longpoll = VkLongPoll(self.session)
 
         """Клавиатуры"""
@@ -27,6 +31,8 @@ class Bot:
         keyboard.add_button('Сегодня', color=VkKeyboardColor.POSITIVE)
         keyboard.add_button('За месяц', color=VkKeyboardColor.PRIMARY)
         keyboard.add_button('За год', color=VkKeyboardColor.NEGATIVE)
+        keyboard.add_line()
+        keyboard.add_button('Выгрузить Excel', color=VkKeyboardColor.POSITIVE)
         return keyboard.get_keyboard()
 
     def chose_keyboard(self):
@@ -35,14 +41,26 @@ class Bot:
         keyboard.add_button(sticker['thumb_dn'], color=VkKeyboardColor.NEGATIVE)
         return keyboard.get_keyboard()
 
-    def __send_message(self, message, keyboard=None):
+    def __upload_document(self, filename: str = 'file'):
+        file = open(f'{filename}', 'rb')
+        a = self.session.method("docs.getMessagesUploadServer", {"type": "doc", "peer_id": self.vk_id})
+        b = requests.post(a['upload_url'], files={"file": file}).json()
+        c = self.session.method('docs.save', {'file': b['file']})
+        attachment = f'doc{c["doc"]["owner_id"]}_{c["doc"]["id"]}'
+        return attachment
+
+    def __send_message(self, message=None, keyboard=None, attachment=None):
         self.session.method('messages.send',
-                            {'user_id': self.vk_id, 'message': message, 'keyboard': keyboard, 'random_id': 0})
+                            {'user_id': self.vk_id,
+                             'message': message,
+                             'attachment': attachment,
+                             'keyboard': keyboard,
+                             'random_id': 0})
 
     def __login(self):
         def __test_password_login(login, password):
             try:
-                RuobrRecipient(login, password)
+                Ruobr(login, password)
             except RuobrException.AuthorizationException:
                 return True
 
@@ -92,32 +110,38 @@ class Bot:
     def __base(self, stage):
         login, password = str(self.login), str(self.password)
         if self.stage == stage:
-            """Общие даты"""
 
+            """Общие даты"""
             if self.text == 'Сегодня':
                 self.__send_message('Ожидайте...', self.d_key)
-                self.__send_message(RuobrRecipient(login, password).day_estimnation('day'))
+                self.__send_message(Ruobr(login, password).day_estimnation('day'))
 
             elif self.text == 'За год':
                 self.__send_message('Ожидайте...', self.d_key)
-                self.__send_message(RuobrRecipient(login, password).year_estimnation('year'))
+                self.__send_message(Ruobr(login, password).year_estimnation('year'))
 
             elif self.text == 'За месяц':
                 self.__send_message('Ожидайте...', self.d_key)
-                self.__send_message(RuobrRecipient(login, password).month_estimnation('month'))
+                self.__send_message(Ruobr(login, password).month_estimnation('month'))
 
                 """Конкретные даты"""
+
             elif len(self.text) == 4 and self.text[0].isdigit():
                 self.__send_message('Ожидайте...', self.d_key)
-                self.__send_message(RuobrRecipient(login, password).year_estimnation(self.text))
+                self.__send_message(Ruobr(login, password).year_estimnation(self.text))
 
             elif len(self.text) == 7 and self.text[0].isdigit():
                 self.__send_message('Ожидайте...', self.d_key)
-                self.__send_message(RuobrRecipient(login, password).month_estimnation(self.text))
+                self.__send_message(Ruobr(login, password).month_estimnation(self.text))
 
             elif len(self.text) == 10 and self.text[0].isdigit():
                 self.__send_message('Ожидайте...', self.d_key)
-                self.__send_message(RuobrRecipient(login, password).day_estimnation(self.text))
+                self.__send_message(Ruobr(login, password).day_estimnation(self.text))
+
+            elif self.text == 'Выгрузить Excel':
+                Ruobr(login, password).ToExcel('scores')
+                attachment = self.__upload_document(filename='scores.xlsx')
+                self.__send_message(attachment=attachment)
 
     def run(self):
         for event in self.longpoll.listen():
