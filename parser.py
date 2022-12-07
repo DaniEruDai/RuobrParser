@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from openpyxl.styles import NamedStyle, PatternFill, Font, Alignment
 from openpyxl.utils import get_column_letter
 
-from data import Month_names
+from data import Month_names, emoji_months
 from data import headers, marks
 
 
@@ -107,28 +107,26 @@ class Ruobr:
 
         all_marks = self.__get_esimation()
 
-        match date:
-            case 'year':
-                date = datetime.today().strftime('%Y')
-            case 'month':
-                date = datetime.today().strftime('%Y.%m')
-            case 'day':
-                date = datetime.today().strftime('%Y.%m.%d')
-            case None:
-                return 'Дата неуказана'
+        if date == 'year':
+            date = datetime.today().strftime('%Y')
+        elif date == 'month':
+            date = datetime.today().strftime('%Y.%m')
+        elif date == 'day':
+            date = datetime.today().strftime('%Y.%m.%d')
+        elif date == None:
+            return RuobrException.NoDateException('Дата неуказана')
 
-        match len(date):
-            case 4:
-                sorted_marks = [ell for ell in all_marks if ell[0][:7] in __student_year(date)]
-                sorted_marks.sort()
-            case 7:
-                sorted_marks = [ell for ell in all_marks if ell[0][:7] in date]
-                sorted_marks.sort()
-            case 10:
-                sorted_marks = [ell for ell in all_marks if ell[0] in date]
-                sorted_marks.sort()
-            case _:
-                return 'Дата указана неверно'
+        if len(date) == 4:
+            sorted_marks = [ell for ell in all_marks if ell[0][:7] in __student_year(date)]
+            sorted_marks.sort()
+        elif len(date) == 7:
+            sorted_marks = [ell for ell in all_marks if ell[0][:7] in date]
+            sorted_marks.sort()
+        elif len(date) == 10:
+            sorted_marks = [ell for ell in all_marks if ell[0] in date]
+            sorted_marks.sort()
+        else:
+            raise RuobrException.DateException('Дата указана неверно')
 
         return sorted_marks
 
@@ -157,7 +155,7 @@ class Ruobr:
                           lessons]
             year_marks.sort()
             if year_marks:
-                result = f'Средний балл за {Month_names[int(date[5:])]} {date[:4]} года\n\n' + '\n'.join(year_marks)
+                result = f'Средний балл за {emoji_months[int(date[5:])]} {date[:4]} года\n\n' + '\n'.join(year_marks)
             else:
                 result = f'Оценок за {date} нет!'
             return result

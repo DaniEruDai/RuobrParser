@@ -13,7 +13,8 @@ class DataBase:
                                            vk_id INT,
                                            stage INT,
                                            login TEXT,
-                                           password TEXT); """)
+                                           password TEXT,
+                                           threads INT); """)
         self.conn.commit()
 
     def information(self):
@@ -25,7 +26,7 @@ class DataBase:
         id_list = [row[0] for row in self.cur.fetchall()]
         if self.vk_id not in id_list:
             self.cur.execute(
-                f"""INSERT INTO users (vk_id,stage,login, password) VALUES ('{self.vk_id}' , -1 , NULL , NULL)""")
+                f"""INSERT INTO users (vk_id,stage,login, password,threads) VALUES ('{self.vk_id}' , -1 , NULL , NULL, 0)""")
             self.conn.commit()
 
     def update_stage(self, stage):
@@ -43,6 +44,7 @@ class DataBase:
     def writer(self,column_name,data):
         self.cur.execute(f"""UPDATE users set '{column_name}' = '{data}' where vk_id = {self.vk_id}""")
         self.conn.commit()
+
 
     def delete_user(self):
         self.cur.execute(f"""DELETE from users where vk_id = {self.vk_id}""")

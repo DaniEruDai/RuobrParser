@@ -7,7 +7,7 @@ sticker = {
 
 }
 
-token = 'vk1.a.dGK2h48Ya21UE7yAuyTPK30Cwf8m3P-aM1qeyHzwR2oR7-_jtJNuin6K-nXYaC2Vmz4IIqPr3qsr2TzY6Eb-XBAALYJbWcO59zajsH99-TdhnDp7D3fkVUUAutzWYVKOhH5-CLMRc5a4L0S7cZGAbe1CpqvMsGzBWgGBI69AYex7tOQhdtG75ckmosteTkFmEzRoYHHN2PT9KjBeD2TY3w'
+token = 'vk1.a.GyvtBGANbHcZfAe0-kVoAPEguyxR34ZwvycgVZHDZxg4g5yMyCtjwq_T-fAoxRwZ15CiaUEw0X02u4ueLOMT04YIqIKKnK0A-KtQmfSqjvEhgsJR-R7l9fjA2IKW6lzVQo4vT1lY2pHfNxOz45ma5LbDR0ybtleiPDiYMvYIfAeBv2i_a72X0feEFDS6cx9L'
 
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -22,7 +22,7 @@ marks = {
     'неудовлетворительно': 2,
 }
 
-Month_names = {
+emoji_months = {
     1: f'январь {emoji.emojize(":snowflake:")}',
     2: f'феварль {emoji.emojize(":cold_face:")}',
     3: f'март {emoji.emojize(":ribbon:")}',
