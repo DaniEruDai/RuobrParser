@@ -23,6 +23,9 @@ class RuobrException(Exception):
     class AuthorizationException(Exception):
         pass
 
+    class Ruobr503Exception(Exception):
+        pass
+
 
 class Ruobr:
 
@@ -36,8 +39,11 @@ class Ruobr:
     def __cookies(self):
         session = requests.Session()
         session.get('https://cabinet.ruobr.ru/login/', headers=headers)
-        data = {'username': f'{self.__username}', 'password': f'{self.__password}',
-                'csrfmiddlewaretoken': dict(session.cookies)['csrftoken']}
+        try:
+            data = {'username': f'{self.__username}', 'password': f'{self.__password}',
+                    'csrfmiddlewaretoken': dict(session.cookies)['csrftoken']}
+        except KeyError:
+            raise RuobrException.Ruobr503Exception('Ошибка на сайте Cabinet Ruobr, попробуйте позже')
         session.post('https://cabinet.ruobr.ru/login/', headers=headers, data=data)
         return dict(session.cookies)
 
@@ -237,7 +243,7 @@ class Ruobr:
                         cell.alignment = Alignment(horizontal='center', vertical='center')
 
             def __size():
-                for i in range(2, sheet.max_column+1):
+                for i in range(2, sheet.max_column + 1):
                     sheet.column_dimensions[f'{get_column_letter(i)}'].width = 5
 
             __create_styles()
@@ -306,8 +312,3 @@ class Ruobr:
         __style()
 
         wb.save(f'{filename}.xlsx')
-
-
-
-
-
